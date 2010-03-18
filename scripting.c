@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <malloc.h>
 #include <string.h>
+#include <errno.h>
 #include <sys/time.h>
 #include <time.h>
 #include <math.h>
@@ -197,30 +198,52 @@ js_require(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
 		return JS_FALSE;
 }
 
-/* Native function list */
-static JSFunctionSpec native_functions[] = {
-/*    name          native          nargs    */
+static JSBool
+js_exec(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
+{
+    JSString *str;
+	JSBool res;
 
-	{"abs",         js_abs,         1}, // for test purposes
-	{"floor",       js_floor,       1}, // for test purposes
-	{"ceil",        js_ceil,        1}, // for test purposes
-	{"time",        js_time,        0},
-	{"log",         js_log,         1},
-	{"emit",        js_emit,        2},
-	{"include",     js_include,     1},
-	{0}
+	char *command;
 
-/*
-	JS_FS("abs",         js_abs,         1, 0, 0), // for test purposes
-	JS_FS("floor",       js_floor,       1, 0, 0), // for test purposes
-	JS_FS("ceil",        js_ceil,        1, 0, 0), // for test purposes
-	JS_FS("time",        js_time,        0, 0, 0),
-	JS_FS("log",         js_log,         1, 0, 0),
-	JS_FS("emit",        js_emit,        2, 0, 0),
-	JS_FS("include",     js_include,     1, 0, 0),
-	JS_FS_END
-*/
-};
+	pid_t child_pid;
+
+    str = JS_ValueToString(cx, argv[0]);
+    if (!str)
+	{
+		logit(("invalid argument to exec()"));
+		return JS_FALSE;
+	}
+
+	command = JS_GetStringBytes(str);
+
+	child_pid = fork();
+	if (child_pid == -1) {
+		logit(("fork() failed"));
+		return JS_FALSE;
+	}
+	if (child_pid > 0) { // parent process
+		int status;
+		pid_t pid = waitpid(child_pid, &status, 0);
+		if (pid == -1) {
+			logit(("waitpid failed"));
+			return JS_FALSE;
+		} else {
+			return JS_NewDoubleValue(cx, (double)status, rval);
+		}
+	} else { // child process
+		char *comargv[4];
+		comargv[0] = "sh";
+		comargv[1] = "-c";
+		comargv[2] = command;
+		comargv[3] = NULL;
+		execvp("sh", comargv);
+		logit(("execvp() failed: %s", strerror(errno)));
+		return JS_FALSE;
+	}
+
+	return JS_FALSE;
+}
 
 /* The class of the global object. */
 static JSClass global_class = {
@@ -374,6 +397,7 @@ BOOL InitScripting(char *main_script_path)
 	JS_DefineFunction(cx, glob, "emit",	js_emit, 1, 0);
 	JS_DefineFunction(cx, glob, "include",	js_include, 1, 0); // DEPRECATED
 	JS_DefineFunction(cx, glob, "require",	js_require, 1, 0);
+	JS_DefineFunction(cx, glob, "exec",	js_exec, 1, 0);
 
 	/*
 	{

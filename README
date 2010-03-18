@@ -104,6 +104,10 @@ new Date().getTime()
 includes (and evaluates) the given javascript file. If a relative path is given (not starting with /)
 it is relative to the current working directory at the time when kbd mangler was started.
 
+------ function exec(command)
+Executes the given command using "sh -c command" and fork/execvp
+Returns the exit code of the command.
+
 
 == Useful stuff ==
 include('js/keysyms.js');
