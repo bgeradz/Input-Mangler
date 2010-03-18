@@ -1,0 +1,258 @@
+<html>
+<head>
+  <title> kbd-mangler </title>
+</head>
+
+<body>
+
+<h1 align="center"> kbd-mangler </h1>
+Version 2.X <br /><br />
+
+<i>
+
+If you happen to know kbd-mangler 0.3 - The version 2.0 and above is something completely different,
+consider it an entirely new program, forget
+that previous versions ever existed and read the entire documentation again.
+<br /><br />
+The main highlights of the new architecture are:
+<ul>
+  <li>No need to touch kernel</li>
+  <li>Write your manglers in JavaScript</li>
+</ul>
+
+If you are interested, here is the <a href="old.html">documentation of the 0.3 version</a>.
+<br /><br />
+NOTE: the old versions and old architecture is no longer maintained, sorry.
+
+</i>
+
+<br /><br />
+<span style="color:red; font-size:20px">
+An important note for the impatient:<br />
+Before you start mangling, please read the README file, especially the RESCUE SEQUENCE section, otherwise you may find yourself wishing
+to kill me because your system stopped to respond to keyboard until a hard-reset.
+</span>
+
+
+
+<h3> Table of contents </h3>
+<ul>
+  <li><a href="#introduction"> Introduction </a></li>
+  <li>
+    <a href="#faq"> FAQ </a><br>
+    <ul>
+      <li><a href="#faq_what">
+        What can I use kbd-mangler for?
+      </a></li>
+      <li><a href="#faq_example">
+        I don't get it, can you give me an example?
+      </a></li>
+      <li><a href="#faq_kbd">
+        Can kbd-mangler be used for any events other than keyboard?
+      </a></li>
+      <li><a href="#faq_app">
+        How do I make kbd-mangler work with my console / X application xyz?
+      </a></li>
+      <li><a href="#faq_system">
+        What systems will kbd-mangler run on?
+      </a></li>
+      <li><a href="#faq_knowledge">
+        What do I need to know to use kbd-mangler.
+      </a></li>
+      <li><a href="#faq_js">
+        Why JavaScript? What does this software have to do with a browser?
+      </a></li>
+      <li><a href="#faq_nojs">
+        I want no JavaScript, I want C (or any other language).
+      </a></li>
+    </ul>
+  </li>
+  <li><a href="#disclaimer"> Disclaimer </a></li>
+  <li><a href="#installation"> Installation </a></li>
+  <li><a href="#ps"> P.S. </a></li>
+  <li><a href="#author"> Author </a></li>
+</ul>
+
+<hr>
+<a name="introduction" />
+
+<h3> Introduction </h3>
+
+kbd-mangler is a tool to modify the keyboard behaviour
+at a low level. Modifications are transparent for the
+entire system and work naturally with any console or X application.
+<br><br>
+
+kbd-mangler grabs the keyboard input device (/etc/input/event3, or something like this)
+and forwards ALL keyboard events to the specified mangler script.<br />
+Mangler script does whatever it wants with the events and emits events to the uinput device (/dev/uinput).<br />
+The System does not know know whether it receives genuine events from your hardware or mangled events from kbd-mangler.
+<br /><br />
+Mangler scripts are written in JavaScript aka ECMA-262.
+<br /><br />
+
+This project is hosted at SourceForge.net <br> 
+For latest downloads and other project related information visit the 
+SourceForge.net project page:<br>
+<a href="http://sourceforge.net/projects/kbd-mangler/">
+  http://sourceforge.net/projects/kbd-mangler/
+</a><br>
+
+<br>
+
+<a href="http://sourceforge.net">
+  <img src="http://sourceforge.net/sflogo.php?group_id=142895&amp;type=5"
+       width="210" height="62" border="0" alt="SourceForge.net Logo" />
+</a>
+
+<br><br>
+
+<hr>
+<a name="faq" />
+
+<h3> FAQ </h3>
+
+<a name="faq_what">
+  <b>What can I use kbd-mangler for?</b>
+  <br><br>
+
+  You can do anything with keyboard events before the system gets a chance to interprete them.
+  <br><br>
+  
+<a name="faq_example">
+  <b>I don't get it, can you give me an example?</b>
+  <br><br>
+
+  I was using kbd-mangler to make that part of the keyboard to the right
+  from the &lt;Enter&gt; key entirely obsolete. Space key pressed in
+  combination with some letter keys 'simulates' the arrows and other
+  'obsolete' physical keys.<br /><br />
+  Why? Well, I wanted my hands to always stay at the classical blind-typing position and never move away.
+  check <code>js/examples/aux_key.js</code>
+  <br><br>
+  Other examples included in the distribution are:<br />
+  <code> js/examples/abbr.js </code> - configure any number of abbreviations that get expanded automatically in ANY application as you type.<br />
+  <code> js/examples/aux_mouse.js </code> - control your mouse pointer with keyboard.<br />
+  <br><br>
+
+<a name="faq_app">
+  <b>How do I make kbd-mangler work with my console / X application xyz?</b>
+  <br><br>
+
+  The advantage of kbd-mangler and one of the reasons for its existence
+  is that it works on the level much lower than distinction between
+  any console or X applications. It modifies the keyboard behaviour at it's
+  very origin.
+  <br>
+  <i>Thus <b>ANY</b> program expecting keyboard input will be affected
+  by kbd-mangler without any specific configuration regardless whether it is
+  a console or an X application.
+  </i>
+  <br><br>
+
+<a name="faq_system">
+  <b> What systems will kbd-mangler run on? </b>
+  <br><br>
+
+  It will work out of the box on Linux running
+  stock kernel versions 2.6.x.
+  <br><br>
+
+<br><br>
+
+<a name="faq_knowledge">
+  <b> What do I need to know to use kbd-mangler? </b>
+  <br><br>
+
+  Currently you must speak JavaScript. There are a few working examples included in the distribution.
+  They will help you to get started quickly. When you get the idea, only your imagination is a limit.
+  <br />
+  Also read the README file, it will explain the simple javascript API you need to understand.
+  <br><br>
+
+<br><br>
+
+<a name="faq_js">
+  <b> Why JavaScript? What does this software have to do with a browser? </b>
+  <br><br>
+  I have chosen JavaScript, because I consider it a fairly simple language suitable perfectly for purposes like this, and easy to embed
+  as a scripting solution.<br /><br />
+
+  If JavaScript is hardly associated with web and browsers in your mind - the short answer is: JavaScropt is another programming language
+  that does not necessarily have anything to do with browsers. A lot of software uses JavaScropt/ECMAScropt as a scripting engine. So
+  does kbd-mangler.<br /><br />
+  
+<br><br>
+
+
+<a name="faq_nojs">
+  <b> I want no JavaScript, I want C (or any other language). </b>
+  <br><br>
+  Sorry, in this case you are on your own. The main.c file is a good knowledge base and starting point to create your manglers in whatever
+  language you want.<br /><br />
+  However, before you start, think about a few things:
+  <ul>
+    <li> If your concern is performance - believe me, unless you need something really weird and heavy, javascript is definitely performant 
+      enough for something like kbd-mangler. With the included examples you'll never notice it with "top".</li>
+    <li> If you consider to share your mangler and someone less experienced comes across it,
+      JS is much simpler to start with and hack around. (Consider this statement limited to the context of writing kbd-mangler logic)</li> 
+  </ul>
+
+<br><br>
+
+
+<a name="faq_kbd">
+  <b>Can kbd-mangler be used for any events other than keyboard?</b>
+  <br><br>
+  Though kbd-mangler's main purpose is consuming and producing keyboard events it works with linux events, thus it may
+  be easily extended/adapted to work with any events.<br /><br />
+  kbd-mangler can emit any type of events out of the box. See <br />
+  <code>js/examples/aux_mouse.js</code>
+  <br />
+  It demonstrates how you can use kbd-mangler for emulating mouse with keyboard.
+<br><br>
+
+
+<hr>
+<a name="disclaimer" />
+
+<h3> Disclaimer </h3>
+
+This software is provided as is without any warranty. <br>
+I am not responsible for any damage caused by using this software. <br>
+Use it at your own risk ... <br><br>
+
+<br><br>
+
+<hr>
+<a name="installation" />
+<h3> Installation </h3>
+   See the README file.
+<br><br>
+
+
+<br><br>
+
+<hr>
+
+<a name="ps">
+  <b>P.S.</b> <br /><br />
+  Your contribution of any kind is always welcome.<br>
+  Should you have any questions and/or suggestions - drop me a line.
+  <br /><br />
+  I do not intend to actively continue development on this project as long as there is no evidence that anyone needs it or needs my help. <br /><br />
+  It is a working system and I have put together a few examples giving enough idea how to make something cool and usefull out of it.<br /><br />
+  If you manage to solve some interesting problem with kbd-mangler, please SHARE your scripts! Maybe someone wants the same or a similar thing.
+
+<br><br>
+
+
+<hr>
+<a name="author" />
+<h3> Author </h3>
+
+<b> Gena Batyan &lt; gbatyan AT gmx DOT net &gt; </b>
+<br><br><br><br><br>
+
+</body>
+</html>

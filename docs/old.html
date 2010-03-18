@@ -1,0 +1,557 @@
+<html>
+<head>
+  <title> kbd-mangler </title>
+</head>
+
+<body>
+
+<h1 align="center"> kbd-mangler </h1>
+Version 0.3.0
+
+<br /<br />
+<span style="color:red">
+  This is the documentation for the old version of kbd-mangler (0.3) that is no longer being maintained.
+</span>
+
+<h3> Table of contents </h3>
+<ul>
+  <li><a href="#introduction"> Introduction </a></li>
+  <li>
+    <a href="#faq"> FAQ </a><br>
+    <ul>
+      <li><a href="#faq_what">
+        What can I use kbd-mangler for?
+      </a></li>
+      <li><a href="#faq_example">
+        I don't get it, can you give me an example?
+      </a></li>
+      <li><a href="#faq_app">
+        How do I make kbd-mangler work with my console / X application xyz?
+      </a></li>
+      <li><a href="#faq_context">
+        Is it possible to have context-dependent behaviour?
+      </a></li>
+      <li><a href="#faq_system">
+        What systems will kbd-mangler run on?
+      </a></li>
+      <li><a href="#faq_install">
+        What do I need to know to be able to install kbd-mangler?
+      </a></li>
+    </ul>
+  </li>
+  <li><a href="#disclaimer"> Disclaimer </a></li>
+  <li><a href="#architecture"> Architecture </a></li>
+  <li><a href="#installation"> Installation </a></li>
+  <li><a href="#manglers"> Manglers </a></li>
+  <li><a href="#invocation"> Invocation of Manglers </a></li>
+  <li><a href="#todo"> TODO </a></li>
+  <li><a href="#author"> Author </a></li>
+</ul>
+
+<hr>
+<a name="introduction" />
+
+<h3> Introduction </h3>
+
+kbd-mangler is a tool to modify the keyboard behaviour
+at a low level in the linux kernel. Modifications are transparent for the
+entire system and work naturally with any console or X application.
+<br><br>
+
+kbd-mangler provides a high degree of flexibility and in addition to
+existing features it is very easy to implement any custom behaviour.
+See the section <a href="#architecture">architecture</a> to understand
+how it works.
+<br><br>
+
+This project is hosted at SourceForge.net <br> 
+For latest downloads and other project related information visit the 
+SourceForge.net project page:<br>
+<a href="http://sourceforge.net/projects/kbd-mangler/">
+  http://sourceforge.net/projects/kbd-mangler/
+</a><br>
+
+<br>
+
+<a href="http://sourceforge.net">
+  <img src="http://sourceforge.net/sflogo.php?group_id=142895&amp;type=5"
+       width="210" height="62" border="0" alt="SourceForge.net Logo" />
+</a>
+
+<br><br>
+
+<hr>
+<a name="faq" />
+
+<h3> FAQ </h3>
+
+<a name="faq_what">
+  <b>What can I use kbd-mangler for?</b>
+  <br><br>
+
+  You can do anything with keyboard events before the kernel and the rest
+  of the system gets a chance to interprete them.
+  <br><br>
+  
+<a name="faq_example">
+  <b>I don't get it, can you give me an example?</b>
+  <br><br>
+
+  I am using kbd-mangler heavily to make that part of the keyboard to the right
+  from the &lt;Enter&gt; key entirely obsolete. Winkey pressed in
+  combination with some letter keys 'simulates' the arrows and other
+  'obsolete' keys.<br>
+  See the section <a href="#manglers">Manglers</a> for the list of current
+  capabilities of kbd-mangler.
+  <br><br>
+
+<a name="faq_app">
+  <b>How do I make kbd-mangler work with my console / X application xyz?</b>
+  <br><br>
+
+  The main advantage of kbd-mangler and one of the reasons for its existence
+  is that it works on the level much lower than distinction between
+  any console or X applications. It modifies the keyboard behaviour at it's
+  very origin in the kernel.
+  <br>
+  <i>Thus <b>ANY</b> program expecting keyboard input will be affected
+  by kbd-mangler without any specific configuration regardless whether it is
+  a console or an X application.
+  </i>
+  <br><br>
+
+<a name="faq_context">
+  <b>Is it possible to have context-dependent behaviour?</b>
+  <br><br>
+
+  Yes, but not out of the box, at least now. You will have to implement
+  a mangler, capable of being informed of the current context, probably by
+  some IPC means and switch the mode of operation accordingly.
+  <br><br>
+  
+<a name="faq_system">
+  <b> What systems will kbd-mangler run on? </b>
+  <br><br>
+
+  It will work out of the box on Linux running
+  kernel versions 2.6.x. Though it should be fairly simple to adapt it
+  for other kernel versions. If you want to make this kind of contribution,
+  you are welcome.
+  <br><br>
+
+  I am not sure if it will work on any
+  architecture other than common x86 PC's. <br>
+  The kernel patch is against the file
+  <code>linux/drivers/input/keyboard/atkbd.c</code>.<br>
+  If someone can comment on this, you are welcome.
+  <br>
+
+<br><br>
+
+
+<a name="faq_install">
+  <b> What do I need to know to be able to install and use kbd-mangler? </b>
+  <br>
+
+  <ul>
+    <li>
+      You neet to know how to <b>compile</b> and install a linux kernel
+      version 2.6.x and how to configure module loading.
+      <br>
+      Explaining how to build and install kernel is beyond this document,
+      there are plenty resources covering this topic in depth.<br><br>
+    </li>
+    <li>
+      Basic understanding of the divice file management on <b>your</b>
+      particular system. It will need different configuration depending
+      on whether your device files are static or under control of
+      devfs or udev.<br><br>
+    </li>
+    <li>
+      Basic knowledge of shell redirection mechanism is necessary to
+      understand how to invoke manglers.
+    </li>
+  </ul>
+  <br><br>
+
+
+<hr>
+<a name="disclaimer" />
+
+<h3> Disclaimer </h3>
+
+This software is provided as is without any warranty. <br>
+I am not responsible for any damage caused by using this software. <br>
+Use it at your own risk ... <br><br>
+
+I am in NO way an experienced kernel hacker, in fact it is the
+first time I've touched kernel. <br><br>
+
+I haven't read any kernel HOWTO's, the necessary knowhow is obtained
+solely by looking at some kernel sources and googling on demand. <br><br>
+
+Thus, although it works <b>perfectly</b> for me, there is a probability that it
+is done partially the wrong way eventually violating some kernel
+principles.
+<br><br>
+
+<i>The kernel part is reasonably small and I would appreciate review of the
+code by someone with REAL kernel development experience so that I can remove
+this paragraph and people don't get scared off.</i>
+<br><br>
+
+
+<hr>
+<a name="architecture" />
+
+<h3> Architecture </h3>
+
+kbd-mangler consists of the following parts:
+
+<ul>
+ <li> <b> kbd_interceptor </b> kernel patch. <br>
+
+   This is a minimal patch of the file
+   <KERNEL_SOURCE>/drivers/input/keyboard/atkbd.c
+   
+   allowing arbitrary kernel modules to easily:
+  
+   <ul>
+     <li> intercept the keyboard events. <br>
+      The intercepted event may be left without changes,
+      modified and returned for processing or completely ignored
+      so that kernel pretends no event has happened.
+     </li>
+     <li> generate arbitrary keyboard events at any time. </li>
+   </ul><br><br>
+ </li>
+
+ <li> <b> kbd_router </b> kernel module <br>
+   
+   This is a kernel module utilizing the above kbd_interceptor patch.
+   It creates two character devices to communicate with it's clients
+   (<b>manglers</b>).
+   This kernel module is intended to make the entire logic of keyboard
+   behaviour modification to be driven by programs in user space.<br><br>
+   
+ </li>
+
+ <li> <b> kbd_router clients </b> further called <i><b>manglers</b></i>.<br>
+   kbd_router's clients or <b>manglers</b> are simple programs running
+   in user space, reading keyboard events from a special input device file,
+   and writing eventually modified events back to a special output device file.
+   <br><br>
+   kbd_router is designed so that custom manglers are extremely easy to
+   implement and use. A few manglers implemented may be taken as examples.
+ </li>
+</ul>
+<br><br>
+
+
+
+<hr>
+<a name="installation" />
+<h3> Installation </h3>
+
+<ul>
+ <li> <b> patch the kernel </b> <br><br>
+
+   Apply the patch located in kbd_interceptor directory.
+   Currently only 2.6.x kernel versions are supported.<br><br>
+
+   To apply the patch do the following:<br><br>
+
+   <code>
+   # go to your kernel source root directory<br>
+   cd /usr/src/linux
+   <br><br>
+   # apply patch<br>
+   patch -p1 < /path/to/kbd_interceptor-VERSION.patch
+   </code>
+   <br><br>
+   rebuild and setup the new kernel as usual.<br><br>
+ </li>
+
+ <li><b>
+   compile and install kbd_router kernel module and mangler programs
+   </b><br><br>
+
+   This is done by usual<br><br>
+   <code>
+   ./configure<br>
+   make<br>
+   make install<br>
+   </code>
+   <br><br>
+   
+   <b>NOTE:</b> make install will put the kbd_router module to
+         <code>/lib/modules/VERSION/misc/</code>
+   <br><br>
+
+   <b>NOTE:</b> kbd_router client executables (manglers) all have the prefix
+     <code>kbdr_</code> (to be found easily)
+   <br><br>
+ </li>
+
+ <li><b> Create the kbd_router device files </b><br><br>
+
+   This step is a little cumbersome, I haven't figured out how to make it
+   easier.<br><br>
+
+   First you must find a free device major number.<br><br>
+
+   For me I have taken the major number 56. Here is the excerpt from
+   linux/Documentation/devices.txt:<br><br>
+   
+<pre>
+      56 char        Apple Desktop Bus
+                     0 = /dev/adb          ADB bus control
+      Additional devices will be added to this number, all
+                 starting with /dev/adb.
+</pre>
+   <br><br>
+
+   If you think this will interfere with your system, pick up another
+   major number.<br><br>
+
+   To tell the driver which major number to use the major number must
+   be given as a parameter to insmod / modprobe, or alternatively configured
+   via /etc/modules.conf<br><br>
+
+   <code>
+   insmod kbd_router.ko major=&lt;MAJOR NUMBER&gt;<br>
+   or<br>
+   modprobe kbd_router major=&lt;MAJOR NUMBER&gt;<br><br>
+
+   After you have chosen a device major number,
+   create two devices:<br><br>
+
+   <code>
+   mknod /dev/kbdr_read c MAJOR 0 <br>
+   mknod /dev/kbdr_write c MAJOR 1 <br>
+   </code>
+   <br>
+   
+   where MAJOR is the selected major number.
+   <br><br>
+
+   After you complete the above steps, boot your modified kernel and
+   insert the kbd_router module you should be able to invoke <b>manglers</b>.
+
+ </li>
+</ul>
+<br><br>
+
+
+
+<hr>
+<a name="manglers" />
+<h3> Manglers </h3>
+
+Following manglers have been implemented so far.
+<br><br>
+
+<table border="1" cellspacing="0" cellpadding="5">
+  <tr>
+    <td valign="top"> <b>kbdr_metamode</b>
+    <td>A particular key is chosen to be the <i>meta key</i>.
+        <i>(not to be confused with the META key in X-Windows keyboard
+	    terminology. Meta key can be any key on the keyboard.)</i>
+	<br><br>
+
+        Further any keys on the keyboard may be configured so that
+        pressing/releasing them in combination with the <i>meta key</i>
+        will be substituted with press/release events of other arbitrary keys.
+	<br><br>
+
+        The number of key mappings is unlimited.<br><br>
+
+	The <i>meta key</i> itself may operate in two modes, normal and
+	extended. In normal mode events for the <i>meta key</i> itself are
+	suppressed and not visible to the system.
+	In extended mode <i>meta key</i> events are emitted only in cases
+	when no other key has been pressed during the time when <i>meta key</i>
+	was held down.<br>
+        Extended mode allows an interesting application - you can mimic
+        the behaviour of halfkeyboard (http://www.halfkeyboard.com)
+	<br><br>
+
+        kbdr_metamode requires path to its configuration file as a single
+	argument. See the files in <code>manglers/metamode/conf/</code>
+	for config file examples.
+    </td>
+  </tr>
+
+  <tr>
+    <td valign="top"> <b>kbdr_ascii_expander</b>
+    <td> This is a simple ASCII only macro expander.<br><br>
+
+        For example you may wish the abbreviation 'dnd' to expand to the text
+        'drag&nbsp;and&nbsp;drop' as you type. When you type 'dnd' immediately
+	followed by any of the <i>terminating characters</i> this mangler will
+	hit backspace several times to erase the word 'dnd' and then type
+        'drag&nbsp;and&nbsp;drop'. Terminating characters are space,
+        punctuation, etc (natural word terminators).
+        <br><br>
+
+        Abbreviations and their corresponding expansion texts are specified
+        through a configuration file which should be given to
+        kbdr_ascii_expander as a sole argument. The number of
+        abbreviation/expansion pairs is unlimited.
+        <br><br>
+
+        Currently only US-ASCII keymap and charset are supported.
+        <br><br>
+
+        For a sample configuration file look at
+        <code>manglers/ascii_expander/conf/sample.conf</code>
+    </td>
+  </tr>
+
+  <tr>
+    <td valign="top"> <b> kbdr_dump </b> </td>
+    <td>
+        This isn't really a mangler, that is, it does not change anything.
+	It prints all keyboard events on the screen and is usefull for
+	debugging of other manglers.
+    <td>
+  </tr>
+  
+  <tr>
+    <td valign="top"> <b> kbdr_hello </b> </td>
+    <td>
+        This is a minimal example to demonstrate what is necessary to
+	implement a mangler. it swaps the Y and Z keys.
+    </td>
+  </tr>
+
+  <tr>
+    <td valign="top"> <b>kbdr_fixreturn</b> </td>
+    <td>
+        The only purpose of this obscure mangler is to emit the release
+	of the &lt;Enter&gt; key. This was intended to fix the hanging
+	of the &lt;Enter&gt; key in some situations.<br>
+	Normally you won't need this.
+    </td>
+  </tr>
+</table>
+<br><br>
+
+<hr>
+<a name="invocation" />
+<h3> Invocation of Manglers </h3>
+
+All manglers are designed to read keyboard events from standard input,
+and write keyboard events to stdandard output. A usual mangler forwards
+some events directly from stdin to stdout without changes and
+modifies, generates or hides some particular set of
+events.
+<br><br>
+
+Activating a mangler is as simple as invoking the following command:
+<br><br>
+
+<code>
+cat /dev/kbdr_read | mangler [arguments...] &gt; /dev/kbdr_write
+</code>
+<br><br>
+
+You can even cascade several manglers into a single processing pipeline:
+<br><br>
+
+<code>
+cat /dev/kbdr_read | mangler1 | mangler2 .... manglerN &gt; /dev/kbdr_write
+</code>
+<br><br>
+
+For example to print all keyboard events to the terminal invoke the following
+command:
+<br><br>
+
+<code>
+cat /dev/kbdr_read | kbdr_dump &gt; /dev/kbdr_write
+</code>
+<br><br>
+
+<b>... but before you do anything, read the below CAREFULLY: </b>
+<br><br>
+<font color="red">
+<h4> !!!!!!!!! IMPORTANT NOTE !!!!!!!!! </h4>
+</font>
+
+kbd_router is designed so that once a mangler opens /dev/kbdr_read,
+the control of keyboard event processing is <b>COMPLETELY TAKEN OVER</b> by the
+kbd_router and the [chain of] mangler[s] being executed.
+<br><br>
+
+Invoking manglers in a wrong way (or trying a badly written mangler)
+can result in making the keyboard partially or completely inoperable.
+<br><br>
+
+Here is an example how to lock your keyboard <b>(DON'T DO THIS !!!!)</b>:
+<br><br>
+<code>cat /dev/kbdr_read</code>
+<br>
+or
+<br>
+<code>cat /dev/kbdr_read | some_client</code>
+<br><br>
+
+Once any of the above commands is launched the keyboard events will be dumped
+to your terminal but won't cause any further effect, because nobody is
+actually writing events back to /dev/kbdr_write. <br><br>
+
+As you have noticed, both of the above have one thing in common: the pipeline
+is not ending with <code> "&gt;&nbsp;/dev/kbdr_write" </code><br><br>
+
+Thus to avoid troubles the rule of thumb is:<br><br>
+
+<i>At any given time if anyone is reading the /dev/kbdr_read file
+someone should also write to the /dev/kbdr_write file.
+AND, if you are invoking it from command line - the whole pipeline should
+be launched by a SINGLE SHELL COMMAND.</i>
+<br><br><br>
+
+Now when you know that you are walking on a VERY THIN ice, you should also know that if something goes wrong there is a nicely working <b>cure</b>:
+<br><br>
+
+kbd_router has a <b>magic key combination</b> to close /dev/kbdr_read on
+it's end and return the system to the normal operation.
+<br><br>
+
+Thus, should your keyboard appear to be 'stolen' by kbd-mangler press
+the following key combination:
+<br><br>
+
+<h3> Left CTRL + Left SHIFT + Right CTRL + Right SHIFT </h3>
+<br><br>
+
+
+<hr>
+<a name="todo" />
+<h3> TODO </h3>
+
+<ul>
+  <li> check if the kbd_interceptor kernel patch doesn't do anything
+       evil to kernel. (HELP!) </li>
+  <li> check if kbd_router module doesn't do anything evil to kernel.
+       (HELP!) </li>
+  <li> write more cool manglers (SUGGESTIONS?) </li>
+  <li> write some documentation for developers </li>
+</ul>
+
+<br>
+Your contribution of any kind is always welcome.<br>
+Should you have any suggestions - drop me a line.
+<br><br>
+
+
+<hr>
+<a name="author" />
+<h3> Author </h3>
+
+<b> Gena Batyan &lt; gbatyan AT gmx DOT net &gt; </b>
+<br><br><br><br><br>
+
+</body>
+</html>
