@@ -16,7 +16,7 @@
 
 BOOL InitScripting(char *main_script_path);
 BOOL DestroyScripting();
-BOOL ProcessKeyEvent(int code, int value);
+BOOL ProcessEvent(int type, int code, int value);
 
 #endif // __SCRIPTING_H__
 
