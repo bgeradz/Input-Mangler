@@ -11,13 +11,14 @@ Version 2.X <br /><br />
 <i>
 
 If you happen to know kbd-mangler 0.3 - The version 2.0 and above is something completely different,
-consider it an entirely new program, forget
+Consider it an entirely new program, forget
 that previous versions ever existed and read the entire documentation again.
 <br /><br />
 The main highlights of the new architecture are:
 <ul>
   <li>No need to touch kernel</li>
   <li>Write your manglers in JavaScript</li>
+  <li>not limited to keyboard, any type of events can be mangled and emited
 </ul>
 
 If you are interested, here is the <a href="old.html">documentation of the 0.3 version</a>.
@@ -27,10 +28,12 @@ NOTE: the old versions and old architecture is no longer maintained, sorry.
 </i>
 
 <br /><br />
+<a name="rescue" />
 <span style="color:red; font-size:20px">
 An important note for the impatient:<br />
-Before you start mangling, please read the README file, especially the RESCUE SEQUENCE section, otherwise you may find yourself wishing
-to kill me because your system stopped to respond to keyboard until a hard-reset.
+Before you start mangling, memorize the following RESCUE KEY SEQUENCE:<br />
+RIGHT CONTROL + RIGHT SHIFT.<br />
+In case a mangler script "steals" your keyboard this sequence terminates the kbd-mangler program.
 </span>
 
 
@@ -69,6 +72,19 @@ to kill me because your system stopped to respond to keyboard until a hard-reset
   </li>
   <li><a href="#disclaimer"> Disclaimer </a></li>
   <li><a href="#installation"> Installation </a></li>
+  <li><a href="#running"> Running </a></li>
+  <li>
+    <a href="#jsapi"> JavaScript API </a>
+    <ul>
+      <li><a href="#js_process"> function process(event) </a></li>
+      <li><a href="#js_emit"> function emit(type, code, value) </a></li>
+      <li><a href="#js_include"> function include(file) </a></li>
+      <li><a href="#js_exec"> function exec(command) </a></li>
+      <li><a href="#js_log"> function log(message) </a></li>
+      <li><a href="#js_time"> function time() </a></li>
+    </ul>
+    
+  </li>
   <li><a href="#ps"> P.S. </a></li>
   <li><a href="#author"> Author </a></li>
 </ul>
@@ -78,15 +94,15 @@ to kill me because your system stopped to respond to keyboard until a hard-reset
 
 <h3> Introduction </h3>
 
-kbd-mangler is a tool to modify the keyboard behaviour
+kbd-mangler is a tool to modify the default behaviour of the input devices such as keyboard and mouse
 at a low level. Modifications are transparent for the
 entire system and work naturally with any console or X application.
 <br><br>
 
-kbd-mangler grabs the keyboard input device (/etc/input/event3, or something like this)
-and forwards ALL keyboard events to the specified mangler script.<br />
+kbd-mangler grabs the the given input devices (like /etc/input/event3)
+and forwards ALL events to the specified mangler script.<br />
 Mangler script does whatever it wants with the events and emits events to the uinput device (/dev/uinput).<br />
-The System does not know know whether it receives genuine events from your hardware or mangled events from kbd-mangler.
+The System does not know whether it receives genuine events from your hardware or mangled events from kbd-mangler.
 <br /><br />
 Mangler scripts are written in JavaScript aka ECMA-262.
 <br /><br />
@@ -116,7 +132,7 @@ SourceForge.net project page:<br>
   <b>What can I use kbd-mangler for?</b>
   <br><br>
 
-  You can do anything with keyboard events before the system gets a chance to interprete them.
+  You can do anything with input coming from keyboard, mouse, etc before the system gets a chance to interprete these events.
   <br><br>
   
 <a name="faq_example">
@@ -127,12 +143,12 @@ SourceForge.net project page:<br>
   from the &lt;Enter&gt; key entirely obsolete. Space key pressed in
   combination with some letter keys 'simulates' the arrows and other
   'obsolete' physical keys.<br /><br />
-  Why? Well, I wanted my hands to always stay at the classical blind-typing position and never move away.
-  check <code>js/examples/aux_key.js</code>
+  Why? I wanted my hands to always stay at the classical blind-typing position and never move away.
+  check <code>examples/aux_key.js</code>
   <br><br>
   Other examples included in the distribution are:<br />
-  <code> js/examples/abbr.js </code> - configure any number of abbreviations that get expanded automatically in ANY application as you type.<br />
-  <code> js/examples/aux_mouse.js </code> - control your mouse pointer with keyboard.<br />
+  <code> examples/abbr.js </code> - configure any number of abbreviations that get expanded automatically in ANY application as you type.<br />
+  <code> examples/aux_mouse.js </code> - control your mouse pointer with keyboard.<br />
   <br><br>
 
 <a name="faq_app">
@@ -144,7 +160,7 @@ SourceForge.net project page:<br>
   any console or X applications. It modifies the keyboard behaviour at it's
   very origin.
   <br>
-  <i>Thus <b>ANY</b> program expecting keyboard input will be affected
+  <i>Thus <b>ANY</b> program expecting input from keyboard, mouse, etc will be affected
   by kbd-mangler without any specific configuration regardless whether it is
   a console or an X application.
   </i>
@@ -164,11 +180,9 @@ SourceForge.net project page:<br>
   <b> What do I need to know to use kbd-mangler? </b>
   <br><br>
 
-  Currently you must speak JavaScript. There are a few working examples included in the distribution.
+  You must speak JavaScript. There are a few working examples included in the distribution.
   They will help you to get started quickly. When you get the idea, only your imagination is a limit.
   <br />
-  Also read the README file, it will explain the simple javascript API you need to understand.
-  <br><br>
 
 <br><br>
 
@@ -201,18 +215,6 @@ SourceForge.net project page:<br>
 <br><br>
 
 
-<a name="faq_kbd">
-  <b>Can kbd-mangler be used for any events other than keyboard?</b>
-  <br><br>
-  Though kbd-mangler's main purpose is consuming and producing keyboard events it works with linux events, thus it may
-  be easily extended/adapted to work with any events.<br /><br />
-  kbd-mangler can emit any type of events out of the box. See <br />
-  <code>js/examples/aux_mouse.js</code>
-  <br />
-  It demonstrates how you can use kbd-mangler for emulating mouse with keyboard.
-<br><br>
-
-
 <hr>
 <a name="disclaimer" />
 
@@ -227,11 +229,134 @@ Use it at your own risk ... <br><br>
 <hr>
 <a name="installation" />
 <h3> Installation </h3>
-   See the README file.
+To compile you will need the spidermonkey library and development files.
+And you will need to update the Makefile and possibly the run.sh script.<br /><br />
+
+Finding spidermonkey may be a bit complicated.<br />
+On ubuntu at least before the Karmic Koala release the packages you needed was:<br /><br />
+
+libmozjs-dev<br /><br />
+
+As per this moment (2010-03-17)<br /><br />
+Utuntu does not want to install this package without blood,
+but thanks to the hint from folks at mediatomb.org project, you can install
+
+xulrunner-dev<br /><br />
+
+package on Karmic. It will provide spidermonkey library, however under somewhat obscure paths.
+You need to set the compiler/linker variables at the top of Makefile accordingly, and you may need to set
+the correct LD_LIBRARY_PATH in the run.sh script<br /><br />
+
+On other distributions, try to look for a package like 'smjs'.<br /><br />
+
+In any case, kbd-mangler looks for jsapi.h file, whereever it is.<br /><br />
+
+Once you have found the spidermonkey, simply run make.<br /><br />
+
+Adapt the run.sh script. You need to find your input devices and maybe set the LD_LIBRARY_PATH environment variable<br /><br />
+
+<br><br>
+
+<hr>
+<a name="running" />
+<h3> Running </h3>
+The prefered way is to adapt the run.sh script and use it to run kbd-mangler.<br />
+(I believe it's a bit annoying to specify your input devices, include paths, etc every time.<br /><br >
+
+Please follow the instructions in run.sh script and adapt it before running.<br /><br />
+
+Example:<br /><br />
+
+<code> sudo ./run.sh examples/trivial.js </code><br /><br />
+
+kbd-mangler command understands following options:
+<ul>
+  <li>
+    <b>-I path</b> (similar to gcc's -I option, adds the given path to the list of include paths where the function <a href="#js_include">include()</a> looks for js files.<br />
+  </li>
+  <li>
+    <b>-r device file </b> specifies input device file to read. Multiple -r options may be given to grab events from several input devices.<br />
+    NOTE: It is highly recomended to add the keyboard device with -r at least during development of your manglers.
+    Otherwise you won't have the <a href="#rescue">RESCUE SEQUENCE</a> at hand!
+  </li>
+  <li>
+    <b>-w device file </b> specifies the uinput device where events are being emited (by the <a href="#js_include">emit()</a> function).
+    This is a mandatory option unless you want to completely suppress input from the devices specified with -r option. (Which you most likely don't).
+  </li>
+</ul>
+
+
+
 <br><br>
 
 
+<hr>
+<a name="jsapi" />
+<h3> JavaScript API </h3>
+Kbd-mangler provides several native functions to be used in your mangler scripts.<br />
+The complete list of functions is presented here:
+
+<a name="js_process" />
+<h4> function process(event) </h4>
+<span style="color:red">This function is an exception to the rest. It is NOT a native function. YOU must implement it in EVERY top-level mangler script.</span><br />
+It is the entry point for your manglers.<br />
+Once kbd-mangler initializes and reads the main script it looks for this function and calls it for every event that is read from the input devices.<br />
+<br />
+Event parameter will contain a JS object with following properties:<br />
+<b>type</b>: event type, (see EV_* constants in keysyms.js)<br />
+<b>code</b>: in case of key event contains the key code (see KEY_* constants in keysyms.js)<br />
+<b>value</b>: in case of key event: 1- press, 0-release, 2-repeat<br /><br />
+
+
+IMPORTANT NOTE:<br />
+This function must eventually emit (see emit function) some events back to the system otherwise your system
+completely stops responding to any input that is grabbed by kbd-mangler!!!
+Normally you want to emit back almost all events you receive with an exception of some keys you wish to suppress or process in a different way.
+<br /><br />
+NOTE: event.type may also be EV_TIMER
+This is a special event NOT generated by system, but by the kbd_mangler program in regular intervals.
+If you are not interested in this type of event, simply ignore it and there is no need to emit it.
+If you wonder what is this event good for - take a look at examples/aux_mouse.js
 <br><br>
+
+
+<a name="js_emit" />
+<h4> function emit(type, code, value) </h4>
+With this function input events are emited into the system. Parameters are the same as properties of the event object passed to the process() function.<br />
+NOTE: emit() is not only for emission of extra emulated events in addition to the genuine events. kbd-mangler does NOT forward any events, you must explicitely emit()
+all events, regardless whether you have mangled them or just passing them through!
+<br><br>
+
+
+<a name="js_include" />
+<h4> function include(file) </h4>
+includes(and evaluates) the given javascript file. If a relative path is given kbd-mangler tries to find the path by prepending all include paths specified. (see -I option).<br />
+This works similar to the -I option to gcc and the #include directive in C.
+<br><br>
+
+
+<a name="js_exec" />
+<h4> function exec(command) </h4>
+Executes the given command using <b>sh -c command</b> and fork/execvp.
+Returns the exit code of the command.<br />
+With help of this function your mangling is not limited to emiting input events.
+<br><br>
+
+
+<a name="js_log" />
+<h4> function log(message) </h4>
+Writes a message to standard output with trailing newline appended automatically.
+Useful for debugging purposes.
+<br /><br />
+
+<a name="js_time" />
+<h4>function time()</h4>
+Returns current time in milliseconds since some point. Do not rely on this point to be unix epoch, etc,
+the function should be only used to compare elapsed time between various events, etc.<br />
+NOTE: You can also go the standard javascript way:<br />
+<code>new Date().getTime()</code>
+
+<br /><br />
 
 <hr>
 

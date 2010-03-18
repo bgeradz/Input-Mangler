@@ -120,8 +120,9 @@ void init_uinput(char *file) {
 void usage() {
 	fprintf(stderr, "Usage: kbd-mangler [options] <script>\n");
 	fprintf(stderr, "Options:\n");
-	fprintf(stderr, "  -r file: read given input device (multiple -r options are allowed)\n");
-	fprintf(stderr, "  -w file: write to the given uinput device (mandatory option)\n");
+	fprintf(stderr, "  -I path: add include path for use by include() JS function (multiple allowed)\n");
+	fprintf(stderr, "  -r device file: read given input device (multiple allowed)\n");
+	fprintf(stderr, "  -w device file: write to the given uinput device (mandatory option)\n");
 
 	exit(1);
 }
