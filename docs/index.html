@@ -31,9 +31,9 @@ NOTE: the old versions and old architecture is no longer maintained, sorry.
 <a name="rescue" />
 <span style="color:red; font-size:20px">
 An important note for the impatient:<br />
-Before you start mangling, memorize the following RESCUE KEY SEQUENCE:<br />
+Before you start mangling, memorize the following RESCUE KEY COMBINATION:<br />
 RIGHT CONTROL + RIGHT SHIFT.<br />
-In case a mangler script "steals" your keyboard this sequence terminates the kbd-mangler program.
+In case a mangler script "steals" your keyboard this combination terminates the kbd-mangler program.
 </span>
 
 
@@ -50,9 +50,6 @@ In case a mangler script "steals" your keyboard this sequence terminates the kbd
       <li><a href="#faq_example">
         I don't get it, can you give me an example?
       </a></li>
-      <li><a href="#faq_kbd">
-        Can kbd-mangler be used for any events other than keyboard?
-      </a></li>
       <li><a href="#faq_app">
         How do I make kbd-mangler work with my console / X application xyz?
       </a></li>
@@ -63,10 +60,13 @@ In case a mangler script "steals" your keyboard this sequence terminates the kbd
         What do I need to know to use kbd-mangler.
       </a></li>
       <li><a href="#faq_js">
-        Why JavaScript? What does this software have to do with a browser?
+        Why JavaScript? What does this software have to do with web?
       </a></li>
       <li><a href="#faq_nojs">
         I want no JavaScript, I want C (or any other language).
+      </a></li>
+      <li><a href="#faq_rescue">
+        Is it possible to redefine the rescue key combination?
       </a></li>
     </ul>
   </li>
@@ -146,7 +146,7 @@ SourceForge.net project page:<br>
   Why? I wanted my hands to always stay at the classical blind-typing position and never move away.
   check <code>examples/aux_key.js</code>
   <br><br>
-  Other examples included in the distribution are:<br />
+  A few other examples:<br />
   <code> examples/abbr.js </code> - configure any number of abbreviations that get expanded automatically in ANY application as you type.<br />
   <code> examples/aux_mouse.js </code> - control your mouse pointer with keyboard.<br />
   <br><br>
@@ -157,7 +157,7 @@ SourceForge.net project page:<br>
 
   The advantage of kbd-mangler and one of the reasons for its existence
   is that it works on the level much lower than distinction between
-  any console or X applications. It modifies the keyboard behaviour at it's
+  any console or X applications. It modifies the input behaviour at it's
   very origin.
   <br>
   <i>Thus <b>ANY</b> program expecting input from keyboard, mouse, etc will be affected
@@ -187,12 +187,12 @@ SourceForge.net project page:<br>
 <br><br>
 
 <a name="faq_js">
-  <b> Why JavaScript? What does this software have to do with a browser? </b>
+  <b> Why JavaScript? What does this software have to do with web? </b>
   <br><br>
   I have chosen JavaScript, because I consider it a fairly simple language suitable perfectly for purposes like this, and easy to embed
   as a scripting solution.<br /><br />
 
-  If JavaScript is hardly associated with web and browsers in your mind - the short answer is: JavaScropt is another programming language
+  If JavaScript is hardly associated with web and browsers in your mind - the short answer is: JavaScript is another programming language
   that does not necessarily have anything to do with browsers. A lot of software uses JavaScropt/ECMAScropt as a scripting engine. So
   does kbd-mangler.<br /><br />
   
@@ -215,6 +215,16 @@ SourceForge.net project page:<br>
 <br><br>
 
 
+<a name="faq_rescue">
+  <b> Is it possible to redefine the rescue key combination? </b>
+  <br><br>
+  Yes. It's very simple, open main.c, and edit the rescue_keys array. In order to find the key names run examples/trivial.js.
+  It will print the names of all keys you press, you'll need to add the KEY_ prefix to the key name.
+  <br /><br />
+  NOTE: For some reason not all key combinations will work. Initially I tried LSHIFT+RSHIFT+LCTRL+RCTRL, but it just does not want to work for some reason,
+  at least on my installation.<br /><br />
+<br><br>
+
 <hr>
 <a name="disclaimer" />
 
@@ -229,7 +239,7 @@ Use it at your own risk ... <br><br>
 <hr>
 <a name="installation" />
 <h3> Installation </h3>
-To compile you will need the spidermonkey library and development files.
+To compile you will need the spidermonkey library and it's development files.
 And you will need to update the Makefile and possibly the run.sh script.<br /><br />
 
 Finding spidermonkey may be a bit complicated.<br />
@@ -261,7 +271,7 @@ Adapt the run.sh script. You need to find your input devices and maybe set the L
 <a name="running" />
 <h3> Running </h3>
 The prefered way is to adapt the run.sh script and use it to run kbd-mangler.<br />
-(I believe it's a bit annoying to specify your input devices, include paths, etc every time.<br /><br >
+(I believe it's a bit annoying to specify your input devices, include paths, etc every time.)<br /><br >
 
 Please follow the instructions in run.sh script and adapt it before running.<br /><br />
 
@@ -277,10 +287,10 @@ kbd-mangler command understands following options:
   <li>
     <b>-r device file </b> specifies input device file to read. Multiple -r options may be given to grab events from several input devices.<br />
     NOTE: It is highly recomended to add the keyboard device with -r at least during development of your manglers.
-    Otherwise you won't have the <a href="#rescue">RESCUE SEQUENCE</a> at hand!
+    Otherwise you won't have the <a href="#rescue">RESCUE KEY COMBINATION</a> at hand!
   </li>
   <li>
-    <b>-w device file </b> specifies the uinput device where events are being emited (by the <a href="#js_include">emit()</a> function).
+    <b>-w device file </b> specifies the uinput device where events are being emited (by the <a href="#js_emit">emit()</a> function).
     This is a mandatory option unless you want to completely suppress input from the devices specified with -r option. (Which you most likely don't).
   </li>
 </ul>
@@ -365,9 +375,9 @@ NOTE: You can also go the standard javascript way:<br />
   Your contribution of any kind is always welcome.<br>
   Should you have any questions and/or suggestions - drop me a line.
   <br /><br />
-  I do not intend to actively continue development on this project as long as there is no evidence that anyone needs it or needs my help. <br /><br />
+  It is likely that this project won't get much activity unless there is evidence that anyone uses it and/or needs my help. <br /><br />
   It is a working system and I have put together a few examples giving enough idea how to make something cool and usefull out of it.<br /><br />
-  If you manage to solve some interesting problem with kbd-mangler, please SHARE your scripts! Maybe someone wants the same or a similar thing.
+  <b>If you manage to solve some interesting problem with kbd-mangler, please SHARE your scripts! Maybe someone wants the same or a similar thing.</b>
 
 <br><br>
 
