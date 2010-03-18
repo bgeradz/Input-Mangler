@@ -1,5 +1,9 @@
-2.0.1
+2.1
  * Added exec native function to scripting.
+ * Changed command line parameters syntax
+ * Now possible to read any number of input devices simultaneously.
+ * Added possibility to specify include paths where to look for JS files (-I option)
+ * Splet js dir into jslib and examples dirs
+ * cleaned up JS code, not using "js/" include prefix anymore, now close to C include behavior
  * removed obsolete code
-
 

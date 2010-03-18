@@ -32,7 +32,7 @@
  */
 #define STACK_CHUNK_SIZE    8192
 
-#define MAIN_SCRIPT "main.js"
+extern char* include_paths[];
 
 static JSRuntime *rt = NULL;
 static JSContext *cx = NULL;
@@ -146,9 +146,13 @@ static JSBool
 js_include(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
 {
     JSString *str;
-	char *filename;
+	char filename[1024];
+	char *incl;
 	char *script;
 	JSBool res;
+
+	char **path;
+
 
     str = JS_ValueToString(cx, argv[0]);
     if (!str)
@@ -157,45 +161,18 @@ js_include(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
 		return JS_FALSE;
 	}
 
-	filename = JS_GetStringBytes(str);
-
-	script = read_script(filename);
-	if (script)
-	{
-		res = evaluate_source(filename, script, 1);
-		free(script);
-		return res;
+	incl = JS_GetStringBytes(str);
+	for (path = include_paths; *path; path++) {
+		sprintf(filename, "%s/%s", *path, incl);
+		script = read_script(filename);
+		if (script) {
+			res = evaluate_source(filename, script, 1);
+			free(script);
+			return res;
+		}
 	}
-	else
-		return JS_FALSE;
-}
-
-static JSBool
-js_require(JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval)
-{
-    JSString *str;
-	char filename[256];
-	char *script;
-	JSBool res;
-
-    str = JS_ValueToString(cx, argv[0]);
-    if (!str)
-	{
-		logit(("invalid argument to include()"));
-		return JS_FALSE;
-	}
-
-	sprintf(filename, "js/%s", JS_GetStringBytes(str));
-
-	script = read_script(filename);
-	if (script)
-	{
-		res = evaluate_source(filename, script, 1);
-		free(script);
-		return res;
-	}
-	else
-		return JS_FALSE;
+	logit(("%s not found in include paths", incl));
+	return JS_FALSE;
 }
 
 static JSBool
@@ -276,7 +253,7 @@ static char *read_script(const char *filename)
 
 	if (stat(filename, &buf))
 	{
-		logit(("Unable to stat file: %s", filename));
+		// logit(("Unable to stat file: %s", filename));
 		return NULL;
 	}
 	size = (int)buf.st_size;
@@ -316,7 +293,7 @@ js_error_reporter(JSContext *cx, const char *message, JSErrorReport *report)
 
 	if (!report)
 	{
-		logit((message));
+		logit(("%s", message));
 		return;
 	}
 
@@ -324,7 +301,7 @@ js_error_reporter(JSContext *cx, const char *message, JSErrorReport *report)
 
 	if (report->filename)
 	{
-		logit_(((char *)report->filename));
+		logit_(("%s", (char *)report->filename));
 		logit_((":"));
 	}
 	if (report->lineno)
@@ -340,7 +317,7 @@ js_error_reporter(JSContext *cx, const char *message, JSErrorReport *report)
 			logit(("(WARN)"))
 	}
 
-	logit((message));
+	logit(("%s", message));
 	if (report->linebuf)
 		logit(("\n%s", report->linebuf));
 
@@ -395,8 +372,6 @@ BOOL InitScripting(char *main_script_path)
 	JS_DefineFunction(cx, glob, "time",	js_time, 1, 0);
 	JS_DefineFunction(cx, glob, "log",	js_log, 1, 0);
 	JS_DefineFunction(cx, glob, "emit",	js_emit, 1, 0);
-	JS_DefineFunction(cx, glob, "include",	js_include, 1, 0); // DEPRECATED
-	JS_DefineFunction(cx, glob, "require",	js_require, 1, 0);
 	JS_DefineFunction(cx, glob, "exec",	js_exec, 1, 0);
 
 	/*
