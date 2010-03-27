@@ -7,6 +7,8 @@ var auxTime = null;
 var aux = false;
 var auxKeys = {};
 
+var pressedKeys = {};
+
 // key bindings in aux mode 
 AUX_SWITCH = KEY_SPACE; // key that triggers the aux mode
 
@@ -25,6 +27,43 @@ AUX_ENTER = KEY_SEMICOLON;
 AUX_DELETE = KEY_G; // delete & backspace
 AUX_BACKSPACE = KEY_H;
 
+
+function SmartKeys() {
+	this.pressedKeys = {};
+}
+SmartKeys.prototype.emit = function(code, value) {
+	if (this.pressedKeys[code]) {
+		switch (value) {
+			case 1:
+				return;
+			case 2:
+				emitKey(code, value);
+				break;
+			case 0:
+				delete this.pressedKeys[code];
+				emitKey(code, value);
+				break;
+		}
+	} else {
+		switch (value) {
+			case 1:
+			case 2:
+				this.pressedKeys[code] = value;
+				emitKey(code, value);
+				break;
+			case 0:
+				return;
+		}
+	}
+}
+SmartKeys.prototype.releaseAll = function() {
+	for (var code in this.pressedKeys) {
+		emitKey(code, 0);
+	}
+	this.pressedKeys = {};
+}
+
+var keys = new SmartKeys();
 
 /* This is the entry point of event processing, this function will be called by the system for every key event.
  * IMPORTANT NOTE: this function must eventually emit some events back to the system otherwise your system
@@ -48,13 +87,18 @@ function processKey(key) {
 	else
 		keyRelease(key);
 	if (! key.cancel) // if processing routines haven't marked the event to be ignored, emit it back to the system
-		emitKey(key.code, key.value);
+		keys.emit(key.code, key.value);
 }
 
 
 function emitKey(code, value) {
 	log("EMIT KEY: "+ sym(code) +" "+ value);
 	emit(EV_KEY, code, value); // emitting key event into the system
+    if (value)
+		pressedKeys[code] = value;
+	else
+		delete pressedKeys[code];
+	emit(EV_SYN, 0, 0);
 }
 
 function keyPress(key, rep) {
@@ -66,6 +110,8 @@ function keyPress(key, rep) {
 				auxTime = t;
 			key.cancel = true;
 			aux = true;
+			if (! rep)
+				keys.releaseAll();
 			break;
 		default: 
 			proc = false;
@@ -74,18 +120,11 @@ function keyPress(key, rep) {
 		return;
 
 	if (aux) {
-		auxKeys[key.code] = true;
 		proc = auxTranslateSequences(key);
 		if (! proc)
 			proc = auxTranslateKey(key);
 		if (! proc) // suppress all unknown keys in aux mode
 			key.cancel = true;
-	} else {
-		if (auxKeys[key.code]) {
-			proc = auxTranslateKey(key);
-			if (! proc) // suppress all unknown keys in aux
-				key.cancel = true;			
-		}		
 	}
 }
 
@@ -100,6 +139,7 @@ function keyRelease(key) {
 				emitKey(AUX_SWITCH, 1);
 				emitKey(AUX_SWITCH, 0);
 			}
+			keys.releaseAll();
 			aux = false;
 			auxTime = null;
 			break;
@@ -113,15 +153,9 @@ function keyRelease(key) {
 	proc = true;
 	if (aux) {
 		proc = auxTranslateKey(key);
-	} else {
-		if (auxKeys[key.code]) {
-			proc = auxTranslateKey(key);
-		}		
 	}
 	if (! proc) // suppress all unknown keys in aux
 		key.cancel = true;
-	
-	delete auxKeys[code];
 }
 
 function auxTranslateKey(key) {
@@ -220,11 +254,11 @@ function auxTranslateSequences(key) {
 }
 
 // a handy function to emit a sequence of keypresses/releases
-function emitKeySequence(keys) {
+function emitKeySequence(arr) {
 	var i;
-	for (i = 0; i < keys.length; i++)
-		emitKey(keys[i], 1);
-	for (i = keys.length - 1; i >= 0; i--)
-		emitKey(keys[i], 0);
+	for (i = 0; i < arr.length; i++)
+		keys.emit(arr[i], 1);
+	for (i = arr.length - 1; i >= 0; i--)
+		keys.emit(arr[i], 0);
 } 
 
