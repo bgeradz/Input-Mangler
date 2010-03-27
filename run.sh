@@ -16,6 +16,8 @@
 # NOTE: Be careful if you decide not to read the keyboard device. In this case the
 #       magic rescue sequence will not be available.
 
+modprobe uinput
+
 KBD_DEV=/dev/input/event3
 MOUSE_DEV=/dev/input/event4
 
