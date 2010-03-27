@@ -78,6 +78,12 @@ void init_uinput(char *file) {
 		__LINE__, strerror(errno));
 	
 	}
+	if (ioctl(uinput_fd, UI_SET_EVBIT, EV_SYN) < 0)
+	{
+		fprintf(stderr, "error at line %d: %s\n",
+		__LINE__, strerror(errno));
+	
+	}
 	for (i = 1; i < KEY_UNKNOWN; i++)
 	{
 		if (ioctl(uinput_fd, UI_SET_KEYBIT, i) < 0)
@@ -93,20 +99,21 @@ void init_uinput(char *file) {
 		fprintf(stderr, "error at line %d: %s\n",
 		__LINE__, strerror(errno));
 	}
-	if (ioctl(uinput_fd, UI_SET_RELBIT, REL_X) < 0)
+	for (i = REL_X; i < REL_MAX; i++)
 	{
-		fprintf(stderr, "error at line %d: %s\n",
-		__LINE__, strerror(errno));
+		if (ioctl(uinput_fd, UI_SET_RELBIT, i) < 0)
+		{
+			fprintf(stderr, "error registering REL %d at line %d: %s\n",
+			i, __LINE__, strerror(errno));
+		}
 	}
-	if (ioctl(uinput_fd, UI_SET_RELBIT, REL_Y) < 0)
+	for (i = BTN_MOUSE; i < BTN_TASK; i++)
 	{
-		fprintf(stderr, "error at line %d: %s\n",
-		__LINE__, strerror(errno));
-	}
-	if (ioctl(uinput_fd, UI_SET_KEYBIT, BTN_LEFT) < 0)
-	{
-		fprintf(stderr, "error at line %d: %s\n",
-		__LINE__, strerror(errno));
+		if (ioctl(uinput_fd, UI_SET_KEYBIT, i) < 0)
+		{
+			fprintf(stderr, "error registering BTN %d at line %d: %s\n",
+			i, __LINE__, strerror(errno));
+		}
 	}
 
 	/* *********** */
