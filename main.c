@@ -43,7 +43,13 @@ void emitEvent(int type, int code, int value) {
 	printf("EMIT: type: %d  code: %d  value: %d\n",
 		ev.type, ev.code, ev.value);
 	*/
-	write(uinput_fd, &ev, sizeof(ev));
+
+	// TODO: currently assuming the first input device to be keyboard
+	if (type == EV_LED) {
+		write(input_fds[0], &ev, sizeof(ev));
+	} else {
+		write(uinput_fd, &ev, sizeof(ev));
+	}
 }
 
 int rescue_keys[] = {
@@ -271,7 +277,9 @@ int main(int argc, char **argv)
 		switch (c) {
 			case 'r': {
 				// preparing input device
-				int input_fd = open(optarg, O_RDONLY);
+				// int input_fd = open(optarg, O_RDONLY);
+				// LED_* events must be written to the input device
+				int input_fd = open(optarg, O_RDWR);
 				if (input_fd < 0)
 				{
 					fprintf(stderr, "could not open input device %s: %s\n", optarg, strerror(errno));
