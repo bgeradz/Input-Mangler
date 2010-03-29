@@ -63,7 +63,7 @@ void init_uinput(char *file) {
 		exit(2);
 	}
 
-	sprintf(dev.name, "uinput keyboard driver");
+	sprintf(dev.name, "input-mangler");
 	write(uinput_fd, &dev, sizeof(dev));
 
 	/* keyboard stuff */
