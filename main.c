@@ -93,7 +93,8 @@ void init_uinput(char *file) {
 		}
 	}
 
-	/* mouse stuff */
+
+	/* mouse related events */
 	if (ioctl(uinput_fd, UI_SET_EVBIT, EV_REL) < 0)
 	{
 		fprintf(stderr, "error at line %d: %s\n",
