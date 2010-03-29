@@ -29,10 +29,10 @@ DIR=$(cd $(dirname "$0"); pwd)
 
 sleep 1 # against initial ENTER key hanging when starting this script from shell
 
-echo Starting kbd-mangler...
+echo Starting input-mangler...
 
 # need this if your spidermonkey library resides in some obscure place (as in my case on ubuntu)
 export LD_LIBRARY_PATH=/usr/lib/xulrunner-devel-1.9.1.8/sdk/lib
 
-$DIR/kbd-mangler -I $DIR/jslib -r $MOUSE_DEV -r $KBD_DEV -w $UINPUT_DEV $@
+$DIR/input-mangler -I $DIR/jslib -r $MOUSE_DEV -r $KBD_DEV -w $UINPUT_DEV $@
 
