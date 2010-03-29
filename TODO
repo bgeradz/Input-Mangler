@@ -1,0 +1,14 @@
+- LED management. Following observations:
+  - Apparently system (at least X) does not necessarily set capslock LED according to the real input state of capslock.
+    System TOGGLES the capslock input state and capslock LED's state  in response to the capslock key.
+    These two states appear to be independent. If a mangler passes capslock key press through, but does not
+    explicitely change the LED state, these two states become asynchronous after IM is terminated. That is capslock LED is activated
+    when low letters are typed and deactivated when switching to capital letters.
+  - after input-mangler is terminated all leds are deactivated. (If input state happens to be in "capital" mode at this moment - result is
+    desynchronization describe above
+  - every console (every text console and X console) has it's own led state - try to press capslock and num lock and switch consoles
+    You'll notice that LED states are returned to the state in which you've left a particular console.
+
+  - Probably need to find a way how to ask the system for the current input state (low/capital)
+    Withough having this possibility IM wouldn't know what to do with leds (i.e. keep capslock LED synchronous with current input mode).
+
