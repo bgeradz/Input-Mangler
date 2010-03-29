@@ -116,6 +116,36 @@ void init_uinput(char *file) {
 		}
 	}
 
+	/* LED events. A virtual uinput device cannot have any leds, so this does not make sense
+	if (ioctl(uinput_fd, UI_SET_EVBIT, EV_LED) < 0)
+	{
+		fprintf(stderr, "error at line %d: %s\n",
+		__LINE__, strerror(errno));
+	}
+	for (i = LED_NUML; i < LED_CNT; i++) {
+		if (ioctl(uinput_fd, UI_SET_LEDBIT, i) < 0)
+		{
+			fprintf(stderr, "error registering LED %d at line %d: %s\n",
+			i, __LINE__, strerror(errno));
+		}
+	}
+	*/
+
+	/* MSC events, no clue what are these good for */
+	if (ioctl(uinput_fd, UI_SET_EVBIT, EV_MSC) < 0)
+	{
+		fprintf(stderr, "error at line %d: %s\n",
+		__LINE__, strerror(errno));
+	}
+	for (i = MSC_SERIAL; i < MSC_CNT; i++) {
+		if (ioctl(uinput_fd, UI_SET_MSCBIT, i) < 0)
+		{
+			fprintf(stderr, "error registering MSC %d at line %d: %s\n",
+			i, __LINE__, strerror(errno));
+		}
+	}
+
+
 	/* *********** */
 	if (ioctl(uinput_fd, UI_DEV_CREATE, 0) < 0)
 	{
